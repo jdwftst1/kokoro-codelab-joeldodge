@@ -43,13 +43,13 @@ class PApiSettings(transport.PTransportSettings, Protocol):
         ...
 
 
-_DEFAULT_INI = "looker.ini"
+_DEFAULT_INIS = ["looker.ini", "../looker.ini"]
 
 
 class ApiSettings(PApiSettings):
     deprecated_settings: Set[str] = {"api_version", "embed_secret", "user_id"}
 
-    def __init__(self, filename: str = _DEFAULT_INI, section: Optional[str] = None):
+    def __init__(self, filename: str = _DEFAULT_INIS[0], section: Optional[str] = None):
         """Configure using a config file and/or environment variables.
 
         Environment variables will override config file settings. Neither
@@ -67,6 +67,10 @@ class ApiSettings(PApiSettings):
             section (str): section in config file. If not supplied default to
                 reading first section.
         """
+        if not os.path.isfile(filename):
+            if filename and filename not in _DEFAULT_INIS:
+                raise FileNotFoundError(f"No config file found: '{filename}'")
+
         self.filename = filename
         self.section = section
         data = self.read_config()
@@ -84,14 +88,8 @@ class ApiSettings(PApiSettings):
         cfg_parser = cp.ConfigParser()
         try:
             config_file = open(self.filename)
-        except FileNotFoundError as ex:
-            # handle undocumented case of caller specifying empty string
-            # to "explicitly" negate config file. best practice is to
-            # simply not specify a filename argument to the constructor
-            if self.filename == _DEFAULT_INI or not self.filename:
-                data: Dict[str, str] = {}
-            else:
-                raise ex
+        except FileNotFoundError:
+            data: Dict[str, str] = {}
         else:
             cfg_parser.read_file(config_file)
             config_file.close()

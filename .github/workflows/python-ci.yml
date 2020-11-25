@@ -1,0 +1,57 @@
+name: Python CI
+on:
+  pull_request_target:
+    paths:
+      - python/**
+      - packages/sdk-codegen*/**
+
+  push:
+    branches:
+      - $default-branch
+    paths:
+      # TODO use an anchor when it's supported
+      - python/**
+      - packages/sdk-codegen*/**
+
+defaults:
+  run:
+    shell: bash
+    working-directory: python/
+
+jobs:
+  build:
+    name: Build
+    env:
+      TOX_JUNIT_OUTPUT_DIR: results/
+      TOX_JUNIT_OUTPUT_NAME: ${{ matrix.os }}.${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+            #- macos-latest
+        python-version:
+          - 3.6
+          - 3.7
+          - 3.8
+          - 3.9
+
+    steps:
+      - name: Repo Checkout
+        uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Tox and any other packages
+        run: |
+          python -m pip install --upgrade pip
+          pip install tox
+      - name: Run Unit Tests
+        run: tox -e unit
+      - name: Upload pytest test results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: python-test-results
+          path: results/
