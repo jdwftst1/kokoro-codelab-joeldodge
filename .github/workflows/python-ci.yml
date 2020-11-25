@@ -22,6 +22,10 @@ jobs:
   build:
     name: Build
     env:
+      LOOKERSDK_CLIENT_ID: ${{ secrets.LOOKERSDK_CLIENT_ID }}
+      LOOKERSDK_CLIENT_SECRET: ${{ secrets.LOOKERSDK_CLIENT_SECRET }}
+      LOOKERSDK_BASE_URL: https://localhost:20000
+      LOOKERSDK_VERIFY_SSL: false
       TOX_JUNIT_OUTPUT_DIR: results/
       TOX_JUNIT_OUTPUT_NAME: ${{ matrix.os }}.${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
