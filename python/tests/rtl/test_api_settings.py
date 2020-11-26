@@ -27,9 +27,13 @@ import pytest  # type: ignore
 from looker_sdk.rtl import api_settings
 
 
-@pytest.fixture(scope="module")
-def config_file(tmpdir_factory):
+@pytest.fixture
+def config_file(monkeypatch, tmpdir_factory):
     """Creates a sample looker.ini file and returns its path"""
+    monkeypatch.delenv("LOOKERSDK_BASE_URL", raising=False)
+    monkeypatch.delenv("LOOKERSDK_VERIFY_SSL", raising=False)
+    monkeypatch.delenv("LOOKERSDK_CLIENT_ID", raising=False)
+    monkeypatch.delenv("LOOKERSDK_CLIENT_SECRET", raising=False)
     filename = tmpdir_factory.mktemp("settings").join("looker.ini")
     filename.write(
         """
