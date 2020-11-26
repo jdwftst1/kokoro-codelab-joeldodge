@@ -1,5 +1,5 @@
 ===========
-Looker SDK
+wrqwer SDK
 ===========
 
 The Looker SDK for Python provides a convenient way to communicate with the
